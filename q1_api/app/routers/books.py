@@ -33,15 +33,20 @@ def create_book(book: BookCreate, session: SessionDep) -> BookRead:
     description=(
         "Lista livros filtrando por título e/ou autor (match parcial, sem diferenciar "
         "maiúsculas/minúsculas). Com os dois filtros, ambos precisam bater. "
-        "Sem filtros, lista todos. Resultado paginado por `offset`/`limit`."
+        "Filtros vazios são ignorados. Sem filtros, lista todos. "
+        "Resultado ordenado por id e paginado por `offset`/`limit`."
     ),
 )
 def search_books(
     session: SessionDep,
-    title: Annotated[str | None, Query(description="Trecho do título")] = None,
-    author: Annotated[str | None, Query(description="Trecho do nome do autor")] = None,
-    offset: Annotated[int, Query(ge=0)] = 0,
-    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    title: Annotated[
+        str | None, Query(max_length=200, description="Trecho do título", examples=["anéis"])
+    ] = None,
+    author: Annotated[
+        str | None, Query(max_length=200, description="Trecho do nome do autor", examples=["tolkien"])
+    ] = None,
+    offset: Annotated[int, Query(ge=0, description="Quantos resultados pular")] = 0,
+    limit: Annotated[int, Query(ge=1, le=100, description="Máximo de resultados (1 a 100)")] = 20,
 ) -> list[BookRead]:
     return crud.search_books(session, title=title, author=author, offset=offset, limit=limit)
 

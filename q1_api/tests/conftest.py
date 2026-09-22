@@ -5,10 +5,10 @@ from datetime import date
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel
 from sqlmodel.pool import StaticPool
 
-from app.database import get_session
+from app.database import build_engine, get_session
 from app.main import app
 from app.models import Book
 
@@ -17,11 +17,8 @@ from app.models import Book
 def session_fixture() -> Iterator[Session]:
     # "sqlite://" = banco em memória. Cada conexão nova abriria um banco VAZIO;
     # o StaticPool faz todas as sessões reutilizarem a mesma conexão.
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
+    # build_engine é o mesmo da aplicação, então o lower() Unicode vale aqui também.
+    engine = build_engine("sqlite://", poolclass=StaticPool)
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         yield session

@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Testes / ferramentas
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Segredos
+.env
+
+# Q1 - banco SQLite local
+*.db
+*.sqlite3
+
+# Q3 - índice FAISS e cache de modelos gerados localmente
+q3_semantic_search/index/
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store

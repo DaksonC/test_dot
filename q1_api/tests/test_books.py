@@ -52,6 +52,22 @@ def test_create_book_strips_whitespace(client: TestClient, book_payload: dict):
     assert response.json()["title"] == "O Hobbit"
 
 
+def test_create_book_today_is_accepted(client: TestClient, book_payload: dict):
+    book_payload["published_date"] = date.today().isoformat()
+
+    response = client.post("/books", json=book_payload)
+
+    assert response.status_code == 201
+
+
+def test_create_book_title_too_long_returns_422(client: TestClient, book_payload: dict):
+    book_payload["title"] = "x" * 201
+
+    response = client.post("/books", json=book_payload)
+
+    assert response.status_code == 422
+
+
 def test_create_book_future_date_returns_422(client: TestClient, book_payload: dict):
     book_payload["published_date"] = (date.today() + timedelta(days=1)).isoformat()
 
@@ -85,6 +101,13 @@ def test_get_book_not_found_returns_404(client: TestClient):
     response = client.get("/books/9999")
 
     assert response.status_code == 404
+    assert response.json() == {"detail": "Livro não encontrado"}
+
+
+def test_get_book_non_integer_id_returns_422(client: TestClient):
+    response = client.get("/books/abc")
+
+    assert response.status_code == 422
 
 
 def test_created_book_can_be_fetched(client: TestClient, book_payload: dict):
@@ -142,6 +165,41 @@ def test_search_respects_limit_and_offset(client: TestClient, seeded_books):
 
     assert response.status_code == 200
     assert titles(response) == [seeded_books[1].title, seeded_books[2].title]
+
+
+def test_search_is_case_insensitive_with_accents(client: TestClient, seeded_books):
+    # O lower() nativo do SQLite não converte "É"; o build_engine corrige isso.
+    response = client.get("/books", params={"title": "ANÉIS"})
+
+    assert response.status_code == 200
+    assert titles(response) == ["O Senhor dos Anéis"]
+
+
+@pytest.mark.parametrize("wildcard", ["%", "_"])
+def test_search_treats_like_wildcards_as_literals(client: TestClient, seeded_books, wildcard: str):
+    # Sem escape, "%" e "_" seriam curingas do LIKE e trariam todos os livros.
+    response = client.get("/books", params={"title": wildcard})
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_search_matches_literal_percent_in_title(client: TestClient, session):
+    session.add(Book(title="100% Python", author="Autor", published_date=date(2020, 1, 1), summary="."))
+    session.add(Book(title="1000 Python", author="Autor", published_date=date(2020, 1, 1), summary="."))
+    session.commit()
+
+    response = client.get("/books", params={"title": "100%"})
+
+    assert titles(response) == ["100% Python"]
+
+
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_search_blank_filter_is_ignored(client: TestClient, seeded_books, blank: str):
+    response = client.get("/books", params={"title": blank, "author": "tolkien"})
+
+    assert response.status_code == 200
+    assert titles(response) == ["O Senhor dos Anéis", "O Hobbit"]
 
 
 @pytest.mark.parametrize("params", [{"limit": 101}, {"limit": 0}, {"offset": -1}])

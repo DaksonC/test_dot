@@ -94,6 +94,12 @@ Perguntas usadas, todas na **mesma sessão**. A 2ª só faz sentido se a memóri
 
 Resultado: [`EXEMPLOS.md`](EXEMPLOS.md).
 
+O arquivo é regravado a cada resposta. Se a API falhar no meio, as respostas já obtidas
+são mantidas e o arquivo fica marcado como **incompleto**. O script tenta até 5 vezes com
+backoff quando o problema é limite por minuto, e explica o que fazer em cada erro. O 429 tem
+duas causas diferentes: `insufficient_quota` significa que a conta está sem crédito, e
+`rate_limit_exceeded` significa excesso de requisições por minuto.
+
 ## Estrutura
 
 ```
@@ -107,6 +113,7 @@ tests/
 ├── conftest.py      # RecordingFakeChatModel (LLM falso)
 ├── test_chain.py    # prompt, memória, sessões e recorte
 ├── test_cli.py      # loop, comandos e erros da API
+├── test_examples.py # gerador de exemplos: salvamento parcial e mensagens de erro
 └── test_config.py   # variáveis obrigatórias e validações
 ```
 

@@ -1,0 +1,11 @@
+# torch apenas para CPU (evita baixar ~2 GB de bibliotecas CUDA).
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# Versões testadas; fixadas para instalação reprodutível.
+torch==2.14.0
+sentence-transformers==6.1.0
+faiss-cpu==1.15.1
+numpy==2.5.3
+
+# testes
+pytest==9.1.1

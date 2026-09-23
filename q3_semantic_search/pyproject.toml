@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+# Testes de integração carregam o modelo real (~470 MB no primeiro uso).
+# Por padrão ficam de fora; rode com: pytest -m integration
+addopts = "-ra -m 'not integration'"
+markers = ["integration: usa o modelo real de embeddings e o índice construído em disco"]

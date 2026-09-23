@@ -1,0 +1,9 @@
+# Versões testadas; fixadas para instalação reprodutível.
+# langchain-core fixado em 1.x: RunnableWithMessageHistory está deprecated e sai na 2.0.
+langchain-core==1.6.4
+langchain-openai==1.6.4
+python-dotenv==1.2.3
+
+# testes (httpx é usado para simular erros HTTP da OpenAI)
+pytest==9.1.1
+httpx==0.28.1

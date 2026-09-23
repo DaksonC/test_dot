@@ -1,0 +1,8 @@
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = [
+    # Mesmos avisos silenciados em chatbot/chain.py (ver README, "Decisões técnicas").
+    "ignore:.*(RunnableWithMessageHistory|InMemoryChatMessageHistory).*deprecated:DeprecationWarning",
+]

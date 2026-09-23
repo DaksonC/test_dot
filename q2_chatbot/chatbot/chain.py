@@ -71,11 +71,16 @@ class SessionStore:
         self._histories.pop(session_id, None)
 
 
-def build_llm(settings: Settings) -> ChatOpenAI:
-    """Cria o cliente do modelo da OpenAI a partir das configurações."""
+def build_llm(settings: Settings, max_retries: int | None = None) -> ChatOpenAI:
+    """Cria o cliente do modelo da OpenAI a partir das configurações.
+
+    max_retries=None mantém o padrão do SDK da OpenAI.
+    """
     kwargs: dict = {}
     if settings.temperature is not None:
         kwargs["temperature"] = settings.temperature
+    if max_retries is not None:
+        kwargs["max_retries"] = max_retries
     return ChatOpenAI(model=settings.model, api_key=settings.openai_api_key, **kwargs)
 
 
